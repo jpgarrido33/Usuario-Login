@@ -123,7 +123,7 @@ public class User {
 
 	public User() {
 		super();
-		// TODO Auto-generated constructor stub implementar nueva..
+		// TODO Auto-generated constructor stub implementar 
 	}
 	
 	
