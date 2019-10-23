@@ -9,7 +9,7 @@ import com.User.Login.Model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-	public Optional findByUsername(String username);
+	public Optional<?> findByUserName(String username);
 	
-	public Optional findByIdAndPassword(Integer id, String password);
+	public Optional<?> findByIdAndPassword(Integer id, String password);
 }

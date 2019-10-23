@@ -9,7 +9,8 @@ import com.User.Login.Model.User;
 import com.User.Login.Repository.RoleRepository;
 import com.User.Login.Services.UserServices;
 
-public class ControllerApp {
+@Controller
+public class UserController {
 
 	@Autowired
 	RoleRepository roleRepository;
