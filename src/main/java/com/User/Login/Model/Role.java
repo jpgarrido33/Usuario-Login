@@ -1,16 +1,19 @@
 package com.User.Login.Model;
 
-import java.util.List;
-
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
+
 
 @Entity
-public class Role {
+public class Role implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5778574821212507625L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "increment")
@@ -19,8 +22,8 @@ public class Role {
 	private String name;
 	private String description;
 	
-	@OneToMany(mappedBy = "role")
-    private List<User> user;
+//	@OneToMany(mappedBy = "role")
+//    private List<User> user;
 	
 	
 	public Long getId() {
