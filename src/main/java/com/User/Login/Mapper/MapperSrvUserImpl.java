@@ -19,11 +19,11 @@ public class MapperSrvUserImpl implements MapperServices <UserDTO, User> {
 		if (Optional.ofNullable(user).isPresent()) {
 			userDto.setId(user.getId());
 			userDto.setFirstName(user.getFirstName());
-			userDto.setLasName(user.getLasName());
+			userDto.setLasName(user.getLastName());
 			userDto.setEmail(user.getEmail());
-			userDto.setUserName(user.getUserName());
+			userDto.setUserName(user.getUsername());
 			userDto.setPassword(user.getPassword());
-			userDto.setConfirmPasword(user.getConfirmPasword());
+			userDto.setConfirmPasword(user.getConfirmPassword());
 		}
 			return userDto;
 	}
@@ -33,12 +33,12 @@ public class MapperSrvUserImpl implements MapperServices <UserDTO, User> {
 		final User user = new User();
 		if(Optional.of(dto).isPresent()){
 			user.setId(dto.getId());
-			user.setUserName(dto.getUserName());
+			user.setUsername(dto.getUserName());
 			user.setFirstName(dto.getFirstName());
-			user.setLasName(dto.getLasName());
+			user.setLastName(dto.getLasName());
 			user.setEmail(dto.getEmail());
 			user.setPassword(dto.getPassword());
-			user.setConfirmPasword(dto.getConfirmPasword());		
+			user.setConfirmPassword(dto.getConfirmPasword());		
 			
 		}
 		return user;

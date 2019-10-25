@@ -5,7 +5,7 @@
 			<th scope="col">#</th>
 			<th scope="col">First</th>
 			<th scope="col">Last</th>
-			<th scope="col">UserName</th>
+			<th scope="col">Username</th>
 			<th scope="col">E-mail</th>
 			<th></th>
 		</tr>
@@ -14,8 +14,8 @@
 		<tr th:each="user: ${userList}">
 			<td th:text="${user.id}"></td>
 			<td th:text="${user.firstName}"></td>
-			<td th:text="${user.lasName}"></td>
-			<td th:text="${user.userName}"></td>
+			<td th:text="${user.lastName}"></td>
+			<td th:text="${user.username}"></td>
 			<td th:text="${user.email}"></td>
 			<td>
 					<span th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')} or (${#authorization.expression('hasRole(''ROLE_USER'')')} and ${#httpServletRequest.remoteUser==user.username})">

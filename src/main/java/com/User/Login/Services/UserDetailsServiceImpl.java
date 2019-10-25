@@ -28,7 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		
-		 com.User.Login.Model.User  appUser = (com.User.Login.Model.User) userRepository.findByUserName(username).orElseThrow(() -> new UsernameNotFoundException("Login Username Invalido."));
+		 com.User.Login.Model.User  appUser =userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Login Username Invalido."));
 		
 		Set<GrantedAuthority> grantList = new HashSet<GrantedAuthority>(); 
 		for (Role role: appUser.getRoles()) {

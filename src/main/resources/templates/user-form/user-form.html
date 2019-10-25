@@ -20,7 +20,7 @@
 		<label class="col-lg-3 col-form-label form-control-label">Last
 			name</label>
 		<div class="col-lg-9">
-			<input class="form-control" type="text" th:field="${userForm.lasName}" th:disabled="${disableFields}">
+			<input class="form-control" type="text" th:field="${userForm.lastName}" th:disabled="${disableFields}">
 			<div class="alert-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Name Error</div>
 	
 		</div>
@@ -33,10 +33,10 @@
 		</div>
 	</div>
 	<div class="form-group row">
-		<label class="col-lg-3 col-form-label form-control-label">UserName</label>
+		<label class="col-lg-3 col-form-label form-control-label">Username</label>
 		<div class="col-lg-9">
-			<input class="form-control" type="text" th:field="${userForm.userName}" th:disabled="${disableFields}">
-			<div class="alert-danger" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}">Name Error</div>
+			<input class="form-control" type="text" th:field="${userForm.username}" th:disabled="${disableFields}">
+			<div class="alert-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Name Error</div>
 		</div>
 	</div>
 	<div class="form-group row">

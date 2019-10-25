@@ -8,9 +8,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.User.Login.DTO.ChangePasswordForm;
 import com.User.Login.Exception.CustomeFieldValidationException;
+import com.User.Login.Exception.UserNameOrIdNotFound;
 import com.User.Login.Model.User;
 import com.User.Login.Repository.UserRepository;
 
@@ -24,13 +25,13 @@ public class UserServicesImpl implements UserServices {
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 	
 	@Override
-	public Iterable getAllUser() {
+	public Iterable <User> getAllUser() {
 		
 		return userRepository.findAll();
 	}
 	
 	private boolean checkUsernameAvailable(User user) throws Exception {
-		Optional userFound = userRepository.findByUserName(user.getUserName());
+		Optional<User> userFound = userRepository.findByUsername(user.getUsername());
 		if (userFound.isPresent()) {
 			throw new CustomeFieldValidationException("Username no disponible","username");
 		}
@@ -38,8 +39,13 @@ public class UserServicesImpl implements UserServices {
 	}
 
 	private boolean checkPasswordValid(User user) throws Exception {
-		if ( !user.getPassword().equals(user.getConfirmPasword())) {
-			throw new CustomeFieldValidationException("Username no disponible","username");
+		
+		if (user.getConfirmPassword() == null || user.getConfirmPassword().isEmpty()) {
+			throw new CustomeFieldValidationException("Confirm Password es obligatorio","confirmPassword");
+		}
+		
+		if ( !user.getPassword().equals(user.getConfirmPassword())) {
+			throw new CustomeFieldValidationException("Password y Confirm Password no son iguales","password");
 		}
 		return true;
 	}
@@ -56,13 +62,13 @@ public class UserServicesImpl implements UserServices {
 	}
 
 	@Override
-	public User getUserById(Long id) throws Exception {
+	public User getUserById(Long id) throws UserNameOrIdNotFound {
 		
-		return  userRepository.findById(id).orElseThrow(() -> new Exception("El usuario no existe"));
+		return  userRepository.findById(id).orElseThrow(() -> new UserNameOrIdNotFound("El Id usuario no existe"));
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+
 	public User updateUser(User fromUser) throws Exception {
 		User toUser = getUserById(fromUser.getId());
 		mapUser(fromUser, toUser);
@@ -75,45 +81,43 @@ public class UserServicesImpl implements UserServices {
 	 * @param to
 	 */
 	protected void mapUser(User from,User to) {
-		to.setUserName(from.getUserName());
+		to.setUsername(from.getUsername());
 		to.setFirstName(from.getFirstName());
-		to.setLasName(from.getLasName());
+		to.setLastName(from.getLastName());
 		to.setEmail(from.getEmail());
 		to.setRoles(from.getRoles());
 	}
-	public void deleteUser(Long id) throws Exception {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new Exception("UsernotFound in deleteUser -"+this.getClass().getName()));
-
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	public void deleteUser(Long id) throws UserNameOrIdNotFound {
+		User user = getUserById(id);
 		userRepository.delete(user);
 	}
+
 	
-	public User changePassword(ChangePasswordForm form) throws Exception{
-		User storedUser = userRepository
-				.findById( form.getId() )
-				.orElseThrow(() -> new Exception("UsernotFound in ChangePassword -"+this.getClass().getName()));
+	
+	@Override
+	public User changePassword(ChangePasswordForm form) throws Exception {
+		User user = getUserById(form.getId());
 		
-		if( !isLoggedUserADMIN() && form.getCurrentPassword().equals(storedUser.getPassword())) {
-			throw new Exception("Current Password Incorrect.");
+		if ( !isLoggedUserADMIN() && !user.getPassword().equals(form.getCurrentPassword())) {
+			throw new Exception ("Current Password invalido.");
 		}
 		
-		if( form.getCurrentPassword().equals(storedUser.getPassword())) {
-			throw new Exception("Current Password Incorrect.");
-		}
-		
-		if ( form.getCurrentPassword().equals(form.getNewPassword())) {
-			throw new Exception("New Password must be different than Current Password!");
+		if( user.getPassword().equals(form.getNewPassword())) {
+			throw new Exception ("Nuevo debe ser diferente al password actual.");
 		}
 		
 		if( !form.getNewPassword().equals(form.getConfirmPassword())) {
-			throw new Exception("New Password and Confirm Password does not match!");
+			throw new Exception ("Nuevo Password y Confirm Password no coinciden.");
 		}
 		
-		storedUser.setPassword(form.getNewPassword());
-		return userRepository.save(storedUser);
+		String encodePassword = bCryptPasswordEncoder.encode(form.getNewPassword());
+		user.setPassword(encodePassword);
+		return userRepository.save(user);
 	}
 	
-	public boolean isLoggedUserADMIN(){
+	private boolean isLoggedUserADMIN() {
 		//Obtener el usuario logeado
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		
@@ -129,40 +133,24 @@ public class UserServicesImpl implements UserServices {
 					.orElse(null); 
 		}
 		return roles != null ? true : false;
-		}
+	}
+	
+	private User getLoggedUser() throws Exception {
+		//Obtener el usuario logeado
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
+		UserDetails loggedUser = null;
 
-		public boolean loggedUserHasRole(String role) {
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			UserDetails loggedUser = null;
-			Object roles = null; 
-			if (principal instanceof UserDetails) {
-				loggedUser = (UserDetails) principal;
-			
-				roles = loggedUser.getAuthorities().stream()
-						.filter(x -> role.equals(x.getAuthority() ))      
-						.findFirst().orElse(null); //loggedUser = null;
-			}
-			return roles != null ?true :false;
+		//Verificar que ese objeto traido de sesion es el usuario
+		if (principal instanceof UserDetails) {
+			loggedUser = (UserDetails) principal;
 		}
 		
-		private User getLoggedUser() throws Exception {
-			//Obtener el usuario logeado
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			
-			UserDetails loggedUser = null;
-
-			//Verificar que ese objeto traido de sesion es el usuario
-			if (principal instanceof UserDetails) {
-				loggedUser = (UserDetails) principal;
-			}
-			
-			User myUser = (User) userRepository.findByUserName(loggedUser.getUsername()).orElseThrow(() -> new Exception(""));
-			
-			return myUser;
-		}
-
+		User myUser = userRepository
+				.findByUsername(loggedUser.getUsername()).orElseThrow(() -> new Exception("Error obteniendo el usuario logeado desde la sesion."));
 		
-
+		return myUser;
+	}
 
 		
 }

@@ -1,4 +1,4 @@
-package com.User.Login.Utils;
+package com.User.Login;
 
 
 	
@@ -31,7 +31,7 @@ import com.User.Login.Services.UserDetailsServiceImpl;
 	    	http
 	        .authorizeRequests()
 	        .antMatchers(resources).permitAll()  
-	        .antMatchers("/","/index").permitAll()
+	        .antMatchers("/","/index","/signup").permitAll()
 	            .anyRequest().authenticated()
 	            .and()
 	        .formLogin()
